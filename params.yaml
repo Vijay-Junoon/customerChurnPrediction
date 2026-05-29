@@ -1,0 +1,7 @@
+etl_transform:
+  input: data/raw/data.csv
+  output: data/processed/data.csv
+
+etl_load:
+  input: data/processed/data.csv
+  # DATABASE INFORMATION
