@@ -4,8 +4,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import OneHotEncoder,OrdinalEncoder
 from sklearn.preprocessing import StandardScaler
 import os
-
-params = yaml.safe_load(open("params.yaml"))
+from src.database.engine import engine
 
 class ETL_Pipeline:
   def __init__(self):
@@ -15,6 +14,7 @@ class ETL_Pipeline:
   def extract(self):
     # API, web scraping logic
     # Currently using csv
+    print("Extracted data!")
     pass
 
 
@@ -22,7 +22,6 @@ class ETL_Pipeline:
     data = pd.read_csv(input_path)
     target = data['Exited']
     data = data.drop(['RowNumber','CustomerId','Surname','Exited'],axis=1)
-    feature_names = data.columns
     categorical_columns = ["Geography", "Gender"]
     numerical_columns = ["CreditScore","Age","Tenure","Balance","NumOfProducts","HasCrCard","IsActiveMember","EstimatedSalary","Complain","Satisfaction Score","Point Earned"]
     ct = ColumnTransformer(transformers=[('simple-encoder',OneHotEncoder(drop = "first"),categorical_columns),('num',StandardScaler(),numerical_columns),('ord-encoder',OrdinalEncoder(categories=[["SILVER",'GOLD','PLATINUM','DIAMOND']]),['Card Type'])],remainder='passthrough',verbose_feature_names_out=False)
@@ -32,12 +31,14 @@ class ETL_Pipeline:
     data.to_csv(output_path,index=False)
     print("Processed data transformed!")
 
-    return feature_names
+  def load(self,data_path):
+    data = pd.read_csv(data_path)
 
-  def load(self):
-    # Load processed data into postgres
-    pass
+    data.to_sql(
+      name = "customer_churn",
+      con = engine,
+      if_exists="replace",
+      index = False
+    )
 
-
-etl = ETL_Pipeline()
-feature_names = etl.transform(params['etl_transform']['input'],params['etl_transform']['output'])
+    print(f"Data loaded to the database!")

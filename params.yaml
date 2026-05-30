@@ -5,3 +5,7 @@ etl_transform:
 etl_load:
   input: data/processed/data.csv
   # DATABASE INFORMATION
+
+model_train:
+  model_path: models/logistic_regression.pkl
+  artifact_path: artifacts
